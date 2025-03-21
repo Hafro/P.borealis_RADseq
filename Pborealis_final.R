@@ -782,7 +782,7 @@ G3$Ind<-samp2
 G3<-G3[,c(1100,1101,1:1099)]
 #G3<-G3[,c(2365,1:2364)]
 
-AlStat<-basic.stats(G3)
+AlStat<-basic.stats(G3[,-c(2)])
 str(AlStat)
 FIS<-AlStat$Fis
 FIS_out<-FIS[row.names(FIS)%in% paste("X",outliers,sep=""),]
@@ -800,6 +800,9 @@ barplot(perLocOut$Ho, ylab=expression("H"[O]),names.arg = c(row.names(perLocOut)
 write.table(perLoc,file = "SummaryStatsAll.csv",sep = "\t",row.names = T)
 row.names(perLocOut[which(perLocOut$Fis==max(perLocOut$Fis)),])
 PopFreqOut[names(PopFreqOut)==row.names(perLocOut[which(perLocOut$Fis==max(perLocOut$Fis)),])]
+
+perPop<-data.frame(Ho=colMeans(AlStat$Ho),Hs=colMeans(AlStat$Hs), Fis=colMeans(AlStat$Fis, na.rm=T))
+write.table(perPop,file = "SummaryStatsPop.csv",sep = "\t",row.names = T)
 
 require(HardyWeinberg)
 require(dplyr)
