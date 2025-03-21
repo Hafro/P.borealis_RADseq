@@ -1,27 +1,6 @@
-setwd("C:/Users/aki/Desktop/P.borealis/P.borealis/")
-require(ggplot2)
 require(vcfR)
-require(cowplot)
-require(ggrepel)
+require(ggplot2)
 require(seqinr)
-
-#require(BiocManager)
-#BiocManager::install("qvalue")
-#require(devtools)
-#devtools::install_github("whitlock/OutFLANK")
-require(OutFLANK)
-
-#BiocManager::install("SNPRelate")
-require(SNPRelate)
-
-#remotes::install_github("privefl/bigsnpr")
-require(bigsnpr)
-
-#install.packages("robust")
-require(robust)
-
-#install.packages("bigstatsr")
-require(bigstatsr)
 
 ###############################################################
 # Pre-filtration (population and SNP level) data visualization 
@@ -83,17 +62,14 @@ require(bigstatsr)
 # 
 # GQ <- extract.gt(x, element = "GQ", as.numeric=TRUE)
 # 
-# 
 indmiss<-read.table("out.imiss",sep="\t",header = T)
 indmiss$INDV
 
 ind<-c("S2_10", "S2_11", "S2_13", "S2_17", "S2_18", "S2_19", "S2_20", "S2_21", "S2_22", "S2_23", "S2_24", "S2_3", "S2_6", "S2_7", "S2_9", "AR_26", "AR_29", "AR_30", "AR_31", "AR_32", "AR_33", "AR_34", "AR_36", "AR_39", "AR_41", "AR_42", "AR_43", "AR_44", "AR_45", "AR_47", "AR_48", "S1_49", "S1_51", "S1_52", "S1_53", "S1_56", "S1_57", "S1_58", "S1_59", "S1_60", "S1_66", "S1_67", "S1_68", "S1_70", "S1_71", "S1_72", "S4_74", "S4_75", "S4_76", "S4_78", "S4_79", "S4_80", "S4_81", "S4_84", "S4_86", "S4_87", "S4_88", "S4_89", "S4_90", "S4_91", "S4_92", "S4_94", "S5_1", "S5_10", "S5_11", "S5_12", "S5_2", "S5_3", "S5_4", "S5_5", "S5_6", "S5_7", "S5_8", "S5_9", "S3_66", "S3_67", "S3_68", "S3_69", "S3_70", "S3_71", "S3_72", "S3_73", "S3_74", "S3_75", "S3_76", "OS_141", "OS_142", "OS_143", "OS_144", "OS_145", "OS_146", "OS_147", "OS_148", "OS_149", "OS_150", "OS_151")
-samp<-c("10_S2","11_S2","13_S2","17_S2","18_S2","19_S2","20_S2","21_S2","22_S2","23_S2","24_S2","3_S2","6_S2","7_S2","9_S2","26_AR","29_AR","30_AR","31_AR","32_AR","33_AR","34_AR","36_AR","39_AR","41_AR","42_AR","43_AR","44_AR","45_AR","47_AR","48_AR","49_S1","51_S1","52_S1","53_S1","56_S1","57_S1","58_S1","59_S1","60_S1","66_S1","67_S1","68_S1","70_S1","71_S1","72_S1","74_S4","75_S4","76_S4","78_S4","79_S4","80_S4","81_S4","84_S4","86_S4","87_S4","88_S4","89_S4","90_S4","91_S4","92_S4","94_S4","1_S5","10_S5","11_S5","12_S5","2_S5","3_S5","4_S5","5_S5","6_S5","7_S5","8_S5","9_S5","66_S3","67_S3","68_S3","69_S3","70_S3","71_S3","72_S3","73_S3","74_S3","75_S3","76_S3","141_OS","142_OS","143_OS","144_OS","145_OS","146_OS","147_OS","148_OS","149_OS","150_OS","151_OS")
 pop<-c(rep("S2",15),rep("AR",16),rep("S1",15),rep("S4",16),rep("S5",12),rep("S3",11),rep("OS",11))
 
 year<-c(rep("2018",62),rep("2021",34))
 indmiss$Sample<-ind
-indmiss$Sample2<-samp
 indmiss$Pop<-pop
 indmiss$Year<-year
 indmiss<-indmiss[order(indmiss$F_MISS,decreasing = T),]
