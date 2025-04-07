@@ -1,3 +1,11 @@
+###########################################################################################################################################
+# R kóði notaður í greininni "Population stratification in northern shrimp (Pandalus borealis) off Iceland evident from RADseq analysis".
+# Höfundur: Áki Jarl Láruson
+# Dagsetning: 20 febrúar 2025
+###########################################################################################################################################
+
+#setwd("P.borealis_RADseq/dat")
+
 require(vcfR)
 require(ggplot2)
 require(seqinr)
@@ -62,20 +70,23 @@ require(seqinr)
 # 
 # GQ <- extract.gt(x, element = "GQ", as.numeric=TRUE)
 # 
+
+#visualize the proportion of missing sites per individual 
 indmiss<-read.table("out.imiss",sep="\t",header = T)
 indmiss$INDV
 
 ind<-c("S2_10", "S2_11", "S2_13", "S2_17", "S2_18", "S2_19", "S2_20", "S2_21", "S2_22", "S2_23", "S2_24", "S2_3", "S2_6", "S2_7", "S2_9", "AR_26", "AR_29", "AR_30", "AR_31", "AR_32", "AR_33", "AR_34", "AR_36", "AR_39", "AR_41", "AR_42", "AR_43", "AR_44", "AR_45", "AR_47", "AR_48", "S1_49", "S1_51", "S1_52", "S1_53", "S1_56", "S1_57", "S1_58", "S1_59", "S1_60", "S1_66", "S1_67", "S1_68", "S1_70", "S1_71", "S1_72", "S4_74", "S4_75", "S4_76", "S4_78", "S4_79", "S4_80", "S4_81", "S4_84", "S4_86", "S4_87", "S4_88", "S4_89", "S4_90", "S4_91", "S4_92", "S4_94", "S5_1", "S5_10", "S5_11", "S5_12", "S5_2", "S5_3", "S5_4", "S5_5", "S5_6", "S5_7", "S5_8", "S5_9", "S3_66", "S3_67", "S3_68", "S3_69", "S3_70", "S3_71", "S3_72", "S3_73", "S3_74", "S3_75", "S3_76", "OS_141", "OS_142", "OS_143", "OS_144", "OS_145", "OS_146", "OS_147", "OS_148", "OS_149", "OS_150", "OS_151")
 pop<-c(rep("S2",15),rep("AR",16),rep("S1",15),rep("S4",16),rep("S5",12),rep("S3",11),rep("OS",11))
 
+##keep track of year in which sample was taken
 year<-c(rep("2018",62),rep("2021",34))
 indmiss$Sample<-ind
 indmiss$Pop<-pop
 indmiss$Year<-year
 indmiss<-indmiss[order(indmiss$F_MISS,decreasing = T),]
-indmiss$Sample2<-factor(indmiss$Sample2,levels = indmiss$Sample2)
+indmiss$Sample<-factor(indmiss$Sample,levels = indmiss$Sample)
 ggplot(data=indmiss)+
-  geom_col(aes(x = Sample2, y = (F_MISS),fill=Year))+
+  geom_col(aes(x = Sample, y = (F_MISS),fill=Year))+
   geom_abline(slope=0,intercept = 0.5,col="black",lwd=1)+
   xlab("")+
   ylab("Fraction of sites with missing data")+
@@ -86,11 +97,15 @@ ggplot(data=indmiss)+
         axis.text.y = element_text(size=14,face="bold"),
         axis.text.x = element_text(size=14,angle = 270, vjust = 0.2,hjust = 1,face="bold"))
 
+##summarize proportion of missing SNPs across sample site
 aggregate(F_MISS~Pop,indmiss,FUN=mean)
 
-#New filtered file
-x<-read.vcfR("../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.vcf")
+###############################################################
+# Post-filtration (population and SNP level) data visualization 
+###############################################################
+x<-read.vcfR("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.vcf")
 
+##summarize the sequencing depth and quality score of the post-filtration VCF file
 queryMETA(x)
 dp <- extract.gt(x, element = "DP", as.numeric=TRUE)
 GQ <- extract.gt(x, element = "GQ", as.numeric=TRUE)
@@ -103,8 +118,8 @@ mean(colMeans(dp,na.rm = T))
 median(colMeans(dp,na.rm = T))
 sd(colMeans(dp,na.rm = T))
 hist(dp,xlab="Sequencing depth")
-min(apply(dp, 2, function(x) min(x, na.rm = TRUE)))
-max(apply(dp, 2, function(x) max(x, na.rm = TRUE)))
+apply(dp, 2, function(x) min(x, na.rm = TRUE))
+apply(dp, 2, function(x) max(x, na.rm = TRUE))
 
 summary(GQ)
 hist(GQ)
