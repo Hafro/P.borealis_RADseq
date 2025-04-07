@@ -75,6 +75,7 @@ require(seqinr)
 indmiss<-read.table("out.imiss",sep="\t",header = T)
 indmiss$INDV
 
+#list individuals and and populations of pre-filtration data
 ind<-c("S2_10", "S2_11", "S2_13", "S2_17", "S2_18", "S2_19", "S2_20", "S2_21", "S2_22", "S2_23", "S2_24", "S2_3", "S2_6", "S2_7", "S2_9", "AR_26", "AR_29", "AR_30", "AR_31", "AR_32", "AR_33", "AR_34", "AR_36", "AR_39", "AR_41", "AR_42", "AR_43", "AR_44", "AR_45", "AR_47", "AR_48", "S1_49", "S1_51", "S1_52", "S1_53", "S1_56", "S1_57", "S1_58", "S1_59", "S1_60", "S1_66", "S1_67", "S1_68", "S1_70", "S1_71", "S1_72", "S4_74", "S4_75", "S4_76", "S4_78", "S4_79", "S4_80", "S4_81", "S4_84", "S4_86", "S4_87", "S4_88", "S4_89", "S4_90", "S4_91", "S4_92", "S4_94", "S5_1", "S5_10", "S5_11", "S5_12", "S5_2", "S5_3", "S5_4", "S5_5", "S5_6", "S5_7", "S5_8", "S5_9", "S3_66", "S3_67", "S3_68", "S3_69", "S3_70", "S3_71", "S3_72", "S3_73", "S3_74", "S3_75", "S3_76", "OS_141", "OS_142", "OS_143", "OS_144", "OS_145", "OS_146", "OS_147", "OS_148", "OS_149", "OS_150", "OS_151")
 pop<-c(rep("S2",15),rep("AR",16),rep("S1",15),rep("S4",16),rep("S5",12),rep("S3",11),rep("OS",11))
 
@@ -126,126 +127,38 @@ hist(GQ)
 min(apply(GQ, 2, function(x) min(x, na.rm = TRUE)))
 max(apply(GQ, 2, function(x) max(x, na.rm = TRUE)))
 
+
 geno <- extract.gt(x) # Character matrix Containing the genotypes
 position <- getPOS(x) # Positions in bp
 chromosome <- getCHROM(x) # Chromosome information
 pos_loc<-paste(chromosome,position,sep="_")
 
+#summarize linkage (post filtration should be one SNP per contig)
 link<-table(chromosome)
 mean(link)
-sum(link>1)/length(link)
+sum(link>1)/length(link) #check if there are any contigs with more than one SNP
 
+#list individuals and and populations of post-filtration data
 pop2<-c(rep("S2",9),rep("AR",10),rep("S1",10),rep("S4",7),rep("S5",11),rep("S3",10),rep("OS",11))
 samp2<-c("11_S2","18_S2","19_S2","20_S2","21_S2","22_S2","24_S2","3_S2","9_S2","29_AR","30_AR","31_AR","36_AR","39_AR","42_AR","43_AR","44_AR","45_AR","48_AR","49_S1","51_S1","52_S1","57_S1","59_S1","66_S1","67_S1","68_S1","70_S1","72_S1","74_S4","75_S4","80_S4","81_S4","88_S4","89_S4","92_S4","1_S5","10_S5","11_S5","12_S5","2_S5","3_S5","4_S5","5_S5","6_S5","8_S5","9_S5","67_S3","68_S3","69_S3","70_S3","71_S3","72_S3","73_S3","74_S3","75_S3","76_S3","141_OS","142_OS","143_OS","144_OS","145_OS","146_OS","147_OS","148_OS","149_OS","150_OS","151_OS")
-year2<-c(rep("2018",36),rep("2021",32))
 
-#prepare sample for OutFLANK analysis
-G <- matrix(NA, nrow = nrow(geno), ncol = ncol(geno),dimnames = list(pos_loc,colnames(geno)))
-
-G[geno %in% c("0/0")] <- 0
-G[geno %in% c("0/1", "1/0")] <- 1
-G[geno %in% c("1/1")] <- 2
-
-sum(is.na(geno))/(nrow(geno)*ncol(geno))
-
-G[is.na(G)]<-9
-
-#separate out the temporal samples
-geno_18<-geno[,c(1:36)]
-colnames(geno_18)
-
-geno_21<-geno[,c(37:68)]
-colnames(geno_21)
-
-sum(is.na(geno_18))/(nrow(geno_18)*ncol(geno_18))
-
-sum(is.na(geno_21))/(nrow(geno_21)*ncol(geno_21))
-
-nll_18<-NULL
-for(i in 1:nrow(geno_18)){
-  if(length(unique(geno_18[i,]))==1){
-    nll_18<-c(nll_18,i)
-  }
-}
-
-nll_21<-NULL
-for(i in 1:nrow(geno_21)){
-  if(length(unique(geno_21[i,]))==1){
-    nll_21<-c(nll_21,i)
-  }
-}
-
-G18 <- matrix(NA, nrow = nrow(geno_18), ncol = ncol(geno_18),dimnames = list(pos_loc,colnames(geno_18)) )
-
-G18[geno_18 %in% c("0/0")] <- 0
-G18[geno_18 %in% c("0/1", "1/0")] <- 1
-G18[geno_18 %in% c("1/1")] <- 2
-
-G18[is.na(G18)]<-9
-
-G21 <- matrix(NA, nrow = nrow(geno_21), ncol = ncol(geno_21),dimnames = list(pos_loc,colnames(geno_21)) )
-
-G21[geno_21 %in% c("0/0")] <- 0
-G21[geno_21 %in% c("0/1", "1/0")] <- 1
-G21[geno_21 %in% c("1/1")] <- 2
-
-G21[is.na(G21)]<-9
-
-SNPmat18<-(t(G18))
-
-SNPmat21<-(t(G21))
-
-#separate out just the Skjálfandi samples
-G_Skj<-G[,c(1:9,20:68)]
-
-G18_Skj<-G[,c(1:9,20:36)]
-
-G21_Skj<-G[,c(37:68)]
-
-SNPmat_Skj<-(t(G_Skj))
-
-SNPmat18_Skj<-(t(G18_Skj))
-
-SNPmat21_Skj<-(t(G21_Skj))
-
-#smartPCA
-spca_tab<-read.table("../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.evec")
-spca_Per_exp<-read.table("../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.eval")
+#visualize smartPCA results
+spca_tab<-read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.evec")
+spca_Per_exp<-read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.eval")
 spca_tab$V7<-pop2
 colnames(spca_tab)<-c("sample.id","EV1","EV2","EV3", "EV4","EV5","Pop")
 spca_tab$order<-c(rep(3,9),rep(1,10),rep(2,10),rep(5,7),rep(6,11),rep(4,10),rep(7,11))
 spca_tab<-spca_tab[order(spca_tab$order),]
 spca_tab$Pop<-factor(spca_tab$Pop,levels=unique(spca_tab$Pop))
-  
-plot(spca_Per_exp$V1[1:10],type="b",ylab=("Eigenvalue"),xlab="PC")
-spca_Per_exp$V1<-(spca_Per_exp$V1/sum(spca_Per_exp$V1))*100
 
-ggplot(spca_tab,aes(EV1,EV2,color=Pop,shape=Pop)) +
-  xlab(paste("PC1 (",round(spca_Per_exp[1,],2),"%)",sep="")) + 
-  ylab(paste("PC2 (",round(spca_Per_exp[2,],2),"%)",sep="")) + 
-  stat_ellipse(data = spca_tab[spca_tab$Pop==c("OS"),], level=0.75,size=2)+
-  geom_point(size=5) +
-  #geom_point(size=3, subset = .(label == 'point'))+
-  scale_shape_manual(name="Pop", labels=unique(spca_tab$Pop)[order(unique(spca_tab$Pop))], values=shp)+
-  scale_color_manual(name="Pop", labels=unique(spca_tab$Pop)[order(unique(spca_tab$Pop))], values=cl)+
-  labs(color="") + 
-  theme_classic()+
-  theme(axis.text=element_text(size=14),axis.title=element_text(size=14))
-
-#smartPCA redone w/ no MAF
-spca_tab<-read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1.evec")
-spca_Per_exp<-read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1.eval")
-plot(spca_Per_exp$V1[1:10],type="b",ylab=("Eigenvalue"),xlab="PC")
-spca_Per_exp$V1<-(spca_Per_exp$V1/sum(spca_Per_exp$V1))*100
-spca_tab$V7<-pop2
-colnames(spca_tab)<-c("sample.id","EV1","EV2","EV3", "EV4","EV5","Pop")
-spca_tab$Pop<-factor(spca_tab$Pop, levels = c("AR","S1","S2","S3","S4","S5","OS"))
-#spca_tab$order<- c(rep(1,25),rep(2,12),rep(3,5),rep(4,11),rep(9,3),rep(5,12),rep(6,8),rep(7,2),rep(8,13),10)
-#spca_tab<-spca_tab[order(spca_tab$order),]
-
-barplot(spca_Per_exp$V1)
-
+#visualize the scree plot for the first 10 principal components   
 plot(spca_Per_exp$V1[1:10],type="b",ylab=("Percent variance explained"),xlab="PC")
+spca_Per_exp$V1<-(spca_Per_exp$V1/sum(spca_Per_exp$V1))*100
+
+#plot PC1 against the first five PCs 
+
+cl<-c("blue","orange","cyan", "lightgreen", "darkgreen","red", "black")
+shp<-c(0,1,2,3,4,5,6)
 
 ggplot(spca_tab,aes(EV1,EV2,color=Pop,shape=Pop)) +
   xlab(paste("PC1 (",round(spca_Per_exp[1,],2),"%)",sep="")) + 
@@ -296,42 +209,15 @@ ggplot(spca_tab,aes(EV1,EV5,color=Pop,shape=Pop)) +
   theme(axis.text=element_text(size=14),axis.title=element_text(size=14))
 
 
-#ADMIXTURE visualization
-
-cv<-read.csv("admixture_CV.csv")
-
-ggplot(cv)+
-  geom_line(aes(K,CV),size=1)+
-  #geom_vline(xintercept = 4,linetype="dashed")+
-  scale_x_continuous(breaks = c(1:15))+
-  theme_classic()+
-  theme(axis.text=element_text(size=14),axis.title=element_text(size=14))
-
-#ADMIXTURE visualization with no MAF filtration and random SNP per contig
-
-cv<-read.csv("../ADMIXTURE_CV3.txt",sep="\t")
-
-ggplot(cv)+
-  geom_line(aes(K,CV),size=1)+
-  #geom_vline(xintercept = 4,linetype="dashed")+
-  scale_x_continuous(breaks = c(1:10))+
-  theme_classic()+
-  theme(axis.text=element_text(size=14),axis.title=element_text(size=14))
-
-tbl2=read.table("../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.2.Q")
+#visualization of ADMIXTURE results
+tbl2=read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.2.Q")
 tbl2$pop<-pop2
 row.names(tbl2)<-samp2
 tbl2<-tbl2[order(tbl2[,3],tbl2[,1],tbl2[,2]),]
 tbl2<-tbl2[c(which(tbl2$pop=="AR"),which(tbl2$pop=="S1"),which(tbl2$pop=="S2"),which(tbl2$pop=="S3"),which(tbl2$pop=="S4"),which(tbl2$pop=="S5"),which(tbl2$pop=="OS")),]
 barplot(t(as.matrix(tbl2)), col=c("red","blue"),xlab=NA, ylab="Ancestry", border=NA,las=2,cex.lab=1.5,cex.names = .75,cex.axis = 1.5)
 
-tbl8=read.table("../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.8.Q")
-tbl8$pop<-pop2
-row.names(tbl8)<-samp2
-tbl8<-tbl8[order(tbl8[,9],tbl8[,1],tbl8[,2],tbl8[,3],tbl8[,4],tbl8[,5],tbl8[,6],tbl8[,7],tbl8[,8]),]
-tbl8<-tbl8[c(which(tbl8$pop=="AR"),which(tbl8$pop=="S1"),which(tbl8$pop=="S2"),which(tbl8$pop=="S3"),which(tbl8$pop=="S4"),which(tbl8$pop=="S5"),which(tbl8$pop=="OS")),]
-barplot(t(as.matrix(tbl8)), col=c("red","orange","yellow","green","lightblue","darkblue","violet","black"),xlab=NA, ylab="Ancestry", border=NA,las=2,cex.lab=1.5,cex.names = .75,cex.axis = 1.5)
-
+#visualization of mean ancestry assignment 
 Qmean<-data.frame(aggregate(V1~pop,tbl2,FUN=mean),V2=aggregate(V2~pop,tbl2,FUN=mean)$V2)
 #Qmean<-data.frame(V1=Qmean$V1,V2=Qmean$V2,pop=c("AR","S3","S4","S1","S2","OS","S5"))
 row.names(Qmean)<-Qmean$pop
@@ -347,47 +233,8 @@ ggplot(data = Qmean)+
   theme_classic()+
   theme(axis.text=element_text(size=14),axis.title=element_text(size=14))
 
-##################################################################
-#indmiss<-read.table("postfiltmiss.imiss",sep="\t",header = T)
-indmiss<-read.table("../postfiltRandmiss.imiss",sep="\t",header = T)
-year2<-c(rep("2018",36),rep("2021",32))
-indmiss$Sample<-samp2
-indmiss$Pop<-pop2
-indmiss$Year<-year2
-indmiss<-indmiss[order(indmiss$F_MISS,decreasing = T),]
-indmiss$Sample<-factor(indmiss$Sample,levels = indmiss$Sample)
-
-ggplot(data=indmiss)+
-  geom_col(aes(x = Sample, y = (F_MISS),fill=Year))+
-  geom_abline(slope=0,intercept = 0.5,col="black",lwd=1)+
-  xlab("")+
-  ylab("Fraction of sites with missing data")+
-  ylim(0,1)+
-  theme_classic()+
-  theme(axis.title=element_text(size=14,face="bold"),
-        legend.title=element_text(size=14,face="bold"),
-        legend.text=element_text(size=14,face="bold"),
-        axis.text.y = element_text(size=14,face="bold"),
-        axis.text.x = element_text(size=14,angle = 270, vjust = 0.2,hjust = 1,face="bold"))
-
-aggregate(N_MISS~Pop,indmiss,FUN=max)
-aggregate(N_MISS~Pop,indmiss,FUN=min)
-aggregate(F_MISS~Pop,indmiss,FUN=mean)
-
-#Fjarlægð
+#compare geographic distance with genetic distance
 library(geo)
-pos1 <- list(lat = c(65, 66), lon = c(-19, -20))
-pos2 <- list(lat = c(62, 65), lon = c(-19, -20))
-
-(dists <- arcdist(pos1, pos2,scale="km"))
-
-NNC <- list(lat = 50.3, lon = 54.1)
-SLE <- list(lat = 48.58, lon = 68.58)
-ESS <- list(lat = 45.38, lon = 61.03)
-
-arcdist(NNC,SLE,scale="km")         # pos1 and pos2 are lists of coordinates
-arcdist(NNC,ESS,scale="km")
-arcdist(SLE, ESS,scale="km")
 
 std<-read.csv("stodvar.csv")
 std$stod[2]
@@ -478,7 +325,8 @@ FST[6,-c(1,2,3,4,5,6)]<-FST[-c(1,2,3,4,5,6),6]
 FST[-7,7]<-FST[7,-7]
 
 FST<-FST/(1-FST)
-#Öll gögn
+
+#compare distances for all data
 (Mant_tot<-vegan::mantel(FST,DIST,method="spearman",permutations=1000))
 plot(density(Mant_tot$perm,),xlab="Mantel",ylab="Density",main="")
 abline(v=Mant_tot$statistic, col="red")
@@ -486,25 +334,24 @@ ade4::mantel.rtest(as.dist(FST),as.dist(DIST),)
 vegan::mantel(DIST,FST,permutations=999)
 ade4::mantel.rtest(as.dist(DIST),as.dist(FST))
 
-#2018 - without Arnarfjarðar
+#compare distances for only 2018
+(Mant_18T<-vegan::mantel(FST[c(1,2,4,7),c(1,2,4,7)],DIST[c(1,2,4,7),c(1,2,4,7)],method="spearman",permutations=999))
+plot(density(Mant_18T$perm,),xlab="Mantel",ylab="Density",main="")
+abline(v=Mant_18T$statistic, col="red")
+
+#compare distances for only 2018 - w/out Arnarfjörður
 (Mant_18<-vegan::mantel(FST[c(1,2,4),c(1,2,4)],DIST[c(1,2,4),c(1,2,4)],method="spearman",permutations=999))
 vegan::mantel(DIST[c(1,2,4),c(1,2,4)],FST[c(1,2,4),c(1,2,4)],permutations=999)
 plot(density(Mant_18$perm,),xlab="Mantel",ylab="Density",main="")
 abline(v=Mant_18$statistic, col="red")
 
-#2021
+#compare distances for only 2021
 (Mant_21<-vegan::mantel(FST[c(3,5,6),c(3,5,6)],DIST[c(3,5,6),c(3,5,6)],method="spearman",permutations=999))
 vegan::mantel(DIST[c(3,5,6),c(3,5,6)],FST[c(3,5,6),c(3,5,6)],permutations=999)
 plot(density(Mant_21$perm,),xlab="Mantel",ylab="Density",main="")
 abline(v=Mant_21$statistic, col="red")
 
-#2018 - all
-(Mant_18T<-vegan::mantel(FST[c(1,2,4,7),c(1,2,4,7)],DIST[c(1,2,4,7),c(1,2,4,7)],method="spearman",permutations=999))
-plot(density(Mant_18T$perm,),xlab="Mantel",ylab="Density",main="")
-abline(v=Mant_18T$statistic, col="red")
-
-
-#All data except Arnarfjarðar
+#All data except Arnarfjörður
 (Mant_sAr<-vegan::mantel(FST[-7,-7],DIST[-7,-7],method="spearman",permutations=1000))
 vegan::mantel(DIST[-7,-7],FST[-7,-7],method="spearman",permutations=1000)
 ade4::mantel.rtest(as.dist(FST[-7,-7]),as.dist(DIST[-7,-7]))
@@ -669,38 +516,10 @@ summary(S5_env$salinity)
 
 
 ################################################################
-# Check Bayescan detection
+#Check Bayescan detection
 ################################################################
-#Data prep (convert from VCF to GESTE)
-# if (!require("devtools")) install.packages("devtools")
-# devtools::install_github("thierrygosselin/radiator")
-require(radiator)
-require(ggplot2)
-kampalampi <- genomic_converter(
-  data = "../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.vcf",
-  output = c("bayescan"), filename="P.borealis.g5mac3dp10ind50g95mdp20p1RandOnePerContig.geste",
-  parallel.core = 1L)
-
-kampalampiP <- genomic_converter(
-  data = "../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.vcf",
-  strata = "strata.tsv",
-  output = c("bayescan"), filename="P.borealis.g5mac3dp10ind50g95mdp20p1RandOnePerContig_pop.geste",
-  parallel.core = 1L)
-
-require(coda)
-chain<-read.table("../P.borealis.g5mac3dp10ind50g95mdp20p1RandOnePerContig.g_fst.txt",header=TRUE)
-chain<-mcmc(chain,thin=10)
-#plot(chain)
-summary(chain)
-autocorr.diag(chain)
-
-BayesMCMC<-read.table("../P.borealis.g5mac3dp10ind50g95mdp20p1RandOnePerContig.g.sel",colClasses = "numeric")
-
-#bayescan=read.table("P.borealis.g5mac3dp10ind50g95mdp20p1.PGD_geste_bayescan_fst.txt") 
-bayescan=read.table("../P.borealis.g5mac3dp10ind50g95mdp20p1RandOnePerContig.g_fst.txt") 
-#SNPb=read.table("../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1_id_vcf.txt",header=FALSE) 
+bayescan=read.table("P.borealis.g5mac3dp10ind50g95mdp20p1RandOnePerContig.g_fst.txt") 
 SNPb<-paste(chromosome,position-1,sep=":")
-#SNPbs<-SNPb[-c(127,1449,2010)] #Remove filtered markers
 bayescan=cbind(SNPb, bayescan) 
 colnames(bayescan)=c("SNP","PROB","LOG_PO","Q_VALUE","ALPHA","FST")  
 bayescan$SELECTION <- ifelse(bayescan$ALPHA>=0&bayescan$Q_VALUE<=0.05,"diversifying",ifelse(bayescan$ALPHA>=0&bayescan$Q_VALUE>0.05,"neutral","balancing")) 
@@ -724,9 +543,12 @@ ggplot(bayescan,aes(x=LOG10_Q,y=FST, label=bayescan$POS))+
         axis.title=element_text(size=18,colour="black",family="Helvetica",face="bold")) +
   theme_classic()
 
+################################################################
+#run PCAdapt detection
+################################################################
 require(pcadapt)
-#path_to_file <- "../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1.recode.vcf"
-path_to_file <- "../P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.vcf"
+
+path_to_file <- "P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.vcf"
 filename <- read.pcadapt(path_to_file, type = "vcf")
 z <- pcadapt(input = filename, K = 20, min.maf = 0.001) 
 plot(z, option = "screeplot")
@@ -760,7 +582,6 @@ length(outliers_Bf)
 row.names(geno[outliers_q,])
 row.names(geno[outliers_BH,])
 row.names(geno[outliers_Bf,])
-#row.names(geno[as.numeric(row.names(OutLoc)),])
 
 bayescan2<-bayescan[bayescan$SNP%in%row.names(geno[outliers_q,]),]
 summary(bayescan2$SELECTION)
@@ -785,6 +606,7 @@ outliers<-bayescan2[bayescan2$SELECTION=="balancing",]$SNP #SNPAdapt og Bayescan
 outliers<-gsub(":","_",outliers)
 
 pos_loc<-paste(chromosome,position-1,sep="_")
+
 require(hierfstat)
 G2 <- matrix(NA, nrow = nrow(geno), ncol = ncol(geno),dimnames = list(pos_loc,colnames(geno)))
 G2[geno %in% c("0/0")] <- 11
@@ -812,7 +634,7 @@ perLocOut<-perLoc[row.names(perLoc)%in% paste("X",outliers,sep=""),]
 barplot(perLocOut$Fis, ylab=expression("F"[IS]),names.arg = c(row.names(perLocOut)),xlab = "Outlier alleles")
 barplot(perLocOut$Ho, ylab=expression("H"[O]),names.arg = c(row.names(perLocOut)),xlab = "Outlier alleles")
 
-write.table(perLoc,file = "SummaryStatsAll.csv",sep = "\t",row.names = T)
+#write.table(perLoc,file = "SummaryStatsAll.csv",sep = "\t",row.names = T)
 row.names(perLocOut[which(perLocOut$Fis==max(perLocOut$Fis)),])
 PopFreqOut[names(PopFreqOut)==row.names(perLocOut[which(perLocOut$Fis==max(perLocOut$Fis)),])]
 
@@ -901,10 +723,8 @@ data.frame(st.info$stod_nr,st.info$leidangur,st.info$ar,st.info$meanDypt)
 
 umhv<-read.csv("umhverfi.csv")
 env<-data.frame(sta=umhv$stod, btm_lat=umhv$breiddargrada, btm_tmp=umhv$botnhiti, srf_tmp=umhv$yfirbordshiti, sal=umhv$selta, dpth=umhv$dypt)
-#env<-env[c(4,3,6),]  
 rownames(env)<-env$sta
 env<-env[,-c(1,2)]
-#env<-env[c(1,3,4,5,6,7,2),]
 barplot(env$btm_tmp,names.arg = row.names(env), main="Bottom temp. (C°)")
 barplot(env$srf_tmp,names.arg = row.names(env), main="Surface temp. (C°)")
 barplot(env$sal,names.arg = row.names(env), ylim=c(34,35),main="P.O.S.")
@@ -991,21 +811,11 @@ barplot(perLocAdapt$Hs, ylab=expression("H"[S]),ylim=c(0,0.5),names.arg = c(row.
 ###################################################################################################
 #L50 gögn frá OS, S1, og S4
 ###################################################################################################
-setwd("C:/Users/aki/Desktop/P.borealis/")
+
 l50<-read.table("l50.skjalfandi.csv",sep=";",header=T)
 l50_S1<-l50[l50$reg=="S1",]
 l50_S4<-l50[l50$reg=="S4",]
 l50_OS<-l50[l50$reg=="OS",]
-??kolmogorov
-ks.test(l50_S1$L50,l50_S4$L50)
-ks.test(l50_S1$L50,l50_OS$L50)
-ks.test(l50_S4$L50,l50_OS$L50)
-ks.test(l50_S1$L50,l50_S4$L50,alternative="greater")
-ks.test(l50_S4$L50,l50_S1$L50,alternative="greater")
-ks.test(l50_S1$L50,l50_OS$L50,alternative="greater")
-ks.test(l50_OS$L50,l50_S1$L50,alternative="greater")
-ks.test(l50_S4$L50,l50_OS$L50,alternative="greater")
-ks.test(l50_OS$L50,l50_S4$L50,alternative="greater")
 
 t.test(l50_S4$L50,l50_S1$L50,paired = T)
 t.test(l50_S1$L50,l50_S4$L50,paired = T,alternative="greater")
