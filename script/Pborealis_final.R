@@ -127,7 +127,9 @@ hist(GQ)
 min(apply(GQ, 2, function(x) min(x, na.rm = TRUE)))
 max(apply(GQ, 2, function(x) max(x, na.rm = TRUE)))
 
-
+###############################################################
+#PCA and Admixture results visualization
+###############################################################
 geno <- extract.gt(x) # Character matrix Containing the genotypes
 position <- getPOS(x) # Positions in bp
 chromosome <- getCHROM(x) # Chromosome information
@@ -142,7 +144,9 @@ sum(link>1)/length(link) #check if there are any contigs with more than one SNP
 pop2<-c(rep("S2",9),rep("AR",10),rep("S1",10),rep("S4",7),rep("S5",11),rep("S3",10),rep("OS",11))
 samp2<-c("11_S2","18_S2","19_S2","20_S2","21_S2","22_S2","24_S2","3_S2","9_S2","29_AR","30_AR","31_AR","36_AR","39_AR","42_AR","43_AR","44_AR","45_AR","48_AR","49_S1","51_S1","52_S1","57_S1","59_S1","66_S1","67_S1","68_S1","70_S1","72_S1","74_S4","75_S4","80_S4","81_S4","88_S4","89_S4","92_S4","1_S5","10_S5","11_S5","12_S5","2_S5","3_S5","4_S5","5_S5","6_S5","8_S5","9_S5","67_S3","68_S3","69_S3","70_S3","71_S3","72_S3","73_S3","74_S3","75_S3","76_S3","141_OS","142_OS","143_OS","144_OS","145_OS","146_OS","147_OS","148_OS","149_OS","150_OS","151_OS")
 
+###########################
 #visualize smartPCA results
+###########################
 spca_tab<-read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.evec")
 spca_Per_exp<-read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.eval")
 spca_tab$V7<-pop2
@@ -208,8 +212,9 @@ ggplot(spca_tab,aes(EV1,EV5,color=Pop,shape=Pop)) +
   theme_classic()+
   theme(axis.text=element_text(size=14),axis.title=element_text(size=14))
 
-
+###################################
 #visualization of ADMIXTURE results
+###################################
 tbl2=read.table("P.borealis_stacks.g5mac3dp10ind50g95mdp20p1RandOnePerContig.2.Q")
 tbl2$pop<-pop2
 row.names(tbl2)<-samp2
@@ -233,7 +238,10 @@ ggplot(data = Qmean)+
   theme_classic()+
   theme(axis.text=element_text(size=14),axis.title=element_text(size=14))
 
-#compare geographic distance with genetic distance
+
+###############################################################
+#comparison of geographic distance with genetic distance
+###############################################################
 library(geo)
 
 std<-read.csv("stodvar.csv")
@@ -330,9 +338,7 @@ FST<-FST/(1-FST)
 (Mant_tot<-vegan::mantel(FST,DIST,method="spearman",permutations=1000))
 plot(density(Mant_tot$perm,),xlab="Mantel",ylab="Density",main="")
 abline(v=Mant_tot$statistic, col="red")
-ade4::mantel.rtest(as.dist(FST),as.dist(DIST),)
 vegan::mantel(DIST,FST,permutations=999)
-ade4::mantel.rtest(as.dist(DIST),as.dist(FST))
 
 #compare distances for only 2018
 (Mant_18T<-vegan::mantel(FST[c(1,2,4,7),c(1,2,4,7)],DIST[c(1,2,4,7),c(1,2,4,7)],method="spearman",permutations=999))
@@ -354,19 +360,10 @@ abline(v=Mant_21$statistic, col="red")
 #All data except Arnarfjörður
 (Mant_sAr<-vegan::mantel(FST[-7,-7],DIST[-7,-7],method="spearman",permutations=1000))
 vegan::mantel(DIST[-7,-7],FST[-7,-7],method="spearman",permutations=1000)
-ade4::mantel.rtest(as.dist(FST[-7,-7]),as.dist(DIST[-7,-7]))
-ade4::mantel.rtest(as.dist(DIST[-7,-7]),as.dist(FST[-7,-7]))
 plot(density(Mant_sAr$perm,),xlab="Mantel",ylab="Density",main="")
 abline(v=Mant_sAr$statistic, col="red")
 
-#Drawn distance from OS against FST
-plot(as.dist(DIST),as.dist(FST))
-plot(as.dist(DIST[c(1,2,4),c(1,2,4)]),as.dist(FST[c(1,2,4),c(1,2,4)]))
-plot(as.dist(DIST[c(1,2,4,7),c(1,2,4,7)]),as.dist(FST[c(1,2,4,7),c(1,2,4,7)]))
-plot(as.dist(DIST[c(4,5,6),c(4,5,6)]),as.dist(FST[c(4,5,6),c(4,5,6)]))
-
-plot(DIST[6,-6],FST[6,-6])
-plot(DIST[6,-c(1,2,4,6,7)],FST[6,-c(1,2,4,6,7)])
+#visualize genetic distance versus physical distance between sites
 FST<-as.matrix(FST)
 
 Dist_FST<-cbind(c(DIST),c(FST))
@@ -376,11 +373,11 @@ Dist_FST$Site<-rep(colnames(DIST),7)
 Dist_FST$Site2<-c(rep(colnames(DIST)[1],7),rep(colnames(DIST)[2],7),rep(colnames(DIST)[3],7),rep(colnames(DIST)[4],7),rep(colnames(DIST)[5],7),rep(colnames(DIST)[6],7),rep(colnames(DIST)[7],7))
 Dist_FST<-Dist_FST[-c(1,8,9,15,16,17,22,23,24,25,29,30,31,32,33,36:41,43:49),]
 
-ggplot(Dist_FST,aes(km,FST,color=Site))+
+ggplot(Dist_FST,aes(km,FST,color=Site, shape=Site2))+
   #geom_line(aes(km,FST),linewidth=0.75)+
   #geom_point(aes(km,FST,color=Year),size=4)+
   geom_point(size=4)+
-  stat_smooth(method="lm",se=F)+
+  #stat_smooth(method="lm",se=F)+
   #geom_text(aes(km,FST,label=row.names(OSdist[-6,])),nudge_x=-1.5,nudge_y=0.0005,size=5)+
   xlab("Distance (km)")+
   ylab(expression('F'[ST]/(1-'F'[ST])))+
@@ -398,18 +395,20 @@ ggplot(Dist_FST,aes(km,FST))+
   theme_classic()+
   theme(text = element_text(size=20))
 
+#visualize genetic distance versus physical distance between sites - excluding Arnarfjörður
 Dist_FST<-cbind(c(DIST[-7,-7]),c(FST[-7,-7]))
 Dist_FST<-as.data.frame(Dist_FST)
 colnames(Dist_FST)<-c("km","FST")
 Dist_FST$Site<-rep(colnames(DIST)[-7],6)
 Dist_FST$Site2<-c(rep(colnames(DIST)[1],6),rep(colnames(DIST)[2],6),rep(colnames(DIST)[3],6),rep(colnames(DIST)[4],6),rep(colnames(DIST)[5],6),rep(colnames(DIST)[6],6))
 Dist_FST<-Dist_FST[-c(1,7,8,13,14,15,19,20,21,22,25,26,27,28,29,31,32,33,34,35,36),]
-ggplot(Dist_FST,aes(km,FST,color=Site))+
+
+ggplot(Dist_FST,aes(km,FST,color=Site, shape=Site2))+
   #geom_line(aes(km,FST),linewidth=0.75)+
   #geom_point(aes(km,FST,color=Year),size=4)+
   geom_point(size=4)+
-  stat_smooth(method="lm",se=F)+
-  stat_ellipse(level=0.75,size=2)+
+  #stat_smooth(method="lm",se=F)+
+  #stat_ellipse(level=0.75,size=2)+
   #geom_text(aes(km,FST,label=row.names(OSdist[-6,])),nudge_x=-1.5,nudge_y=0.0005,size=5)+
   xlab("Distance (km)")+
   ylab(expression('F'[ST]/(1-'F'[ST])))+
@@ -428,6 +427,7 @@ ggplot(Dist_FST,aes(km,FST))+
   theme_classic()+
   theme(text = element_text(size=20))
 
+#visualize genetic distance to distance from  OS site 
 OSdist<-data.frame(t(rbind(DIST[6,-6],FST[6,-6])))
 colnames(OSdist)<-c("km","FST")
 OSdist$Year<-factor(c(2018,2018,2021,2018,2021,2018),levels=c(2018,2021))
@@ -441,6 +441,7 @@ ggplot(OSdist[-6,])+
   theme_classic()+
   theme(text = element_text(size=20))
 
+#visualize genetic distance to distance from  S1 site (most nearshore) 
 Sdist<-data.frame(t(rbind(DIST[1,],FST[1,])))
 colnames(Sdist)<-c("km","FST")
 Sdist$Year<-factor(c(2018,2018,2021,2018,2021,2021,2018),levels=c(2018,2021))
@@ -454,19 +455,9 @@ ggplot(Sdist[-7,])+
   theme_classic()+
   theme(text = element_text(size=20))
 
-#Visualize IBD 
-plot(log(as.dist(DIST[-7,-7])),as.dist(FST[-7,-7]))
-
-arcdist(lat=AR[[1]][1],lon=AR[[2]][1],lat1=AR[[1]][2],lon1=AR[[2]][2])
-
-env<-std[,c(6:10,13:15,17)]
-row.names(env)<-c("S4","AR","S2","S1","OS","S5","S3")
-env<-env[c(4,3,7,1,6,5,2),]
-FST[is.na(FST)]<-0
-FST<-data.frame(FST)
-vegan::adonis2(FST~kastad_breidd*kastad_lengd*hift_breidd*hift_lengd*botnhiti*yfirbordshiti*lofthiti*toglengd,data=env, permutations = 99)
-vegan::adonis2(FST~botnhiti*yfirbordshiti*lofthiti,data=env)
-
+###############################################################
+#calculation of bootstrap FST values 
+###############################################################
 require(adegenet)
 require(StAMPP)
 G2 <- matrix(NA, nrow = nrow(geno), ncol = ncol(geno),dimnames = list(pos_loc,colnames(geno)))
@@ -490,33 +481,8 @@ str(btstrp)
 require(matrixStats)
 bt_summary<-data.frame(Pop1=Pop1, Pop2=Pop2, BootMean=rowMeans(btstrp[,-c(1,2)]),BootMedian=rowMedians(btstrp[,-c(1,2)]),BootVars=rowVars(btstrp[,-c(1,2)]))
 
-######################################################
-# check env. data in Skjálfandi
-######################################################
-x<-read.csv("Skjalfandi_ps.csv")
-summary(x$latitude)
-summary(x$longitude)
-
-#S1 
-S1_env<-x[x$latitude>66.0654 & x$latitude<66.07,]
-#S2
-S2_env<-x[x$latitude>66.188 & x$latitude<66.25,]
-#S3
-S3_env<-x[x$latitude>66.265 & x$latitude<66.3,]
-#S4
-S4_env<-x[x$latitude>66.37 & x$latitude<66.4,]
-#S5
-S5_env<-x[x$latitude>66.44 & x$latitude<66.5,]
-
-summary(S1_env$salinity)
-summary(S2_env$salinity)
-summary(S3_env$salinity)
-summary(S4_env$salinity)
-summary(S5_env$salinity)
-
-
 ################################################################
-#Check Bayescan detection
+#check Bayescan detection
 ################################################################
 bayescan=read.table("P.borealis.g5mac3dp10ind50g95mdp20p1RandOnePerContig.g_fst.txt") 
 SNPb<-paste(chromosome,position-1,sep=":")
@@ -583,6 +549,7 @@ row.names(geno[outliers_q,])
 row.names(geno[outliers_BH,])
 row.names(geno[outliers_Bf,])
 
+#look at joint subset of Bayescan and PCAdapt  
 bayescan2<-bayescan[bayescan$SNP%in%row.names(geno[outliers_q,]),]
 summary(bayescan2$SELECTION)
 ggplot(bayescan2,aes(x=LOG10_Q,y=FST, label=SNP))+
@@ -600,13 +567,16 @@ ggplot(bayescan2,aes(x=LOG10_Q,y=FST, label=SNP))+
   theme_classic()
   
 
-#Subset of outlier alleles
+#Subset of outlier alleles specifically flagged as under balancing selection by Bayescan
 outliers<-bayescan2[bayescan2$SELECTION=="balancing",]$SNP #SNPAdapt og Bayescan
 
 outliers<-gsub(":","_",outliers)
 
 pos_loc<-paste(chromosome,position-1,sep="_")
 
+###############################################################
+#calculation of per locus FST values and other summary stats 
+###############################################################
 require(hierfstat)
 G2 <- matrix(NA, nrow = nrow(geno), ncol = ncol(geno),dimnames = list(pos_loc,colnames(geno)))
 G2[geno %in% c("0/0")] <- 11
@@ -639,7 +609,7 @@ row.names(perLocOut[which(perLocOut$Fis==max(perLocOut$Fis)),])
 PopFreqOut[names(PopFreqOut)==row.names(perLocOut[which(perLocOut$Fis==max(perLocOut$Fis)),])]
 
 perPop<-data.frame(Ho=colMeans(AlStat$Ho),Hs=colMeans(AlStat$Hs), Fis=colMeans(AlStat$Fis, na.rm=T))
-write.table(perPop,file = "SummaryStatsPop.csv",sep = "\t",row.names = T)
+#write.table(perPop,file = "SummaryStatsPop.csv",sep = "\t",row.names = T)
 
 require(HardyWeinberg)
 require(dplyr)
@@ -702,6 +672,29 @@ ggplot(df_out)+
 ######################################################
 #Environmental association
 ######################################################
+
+#check environmental data in Skjálfandi
+x<-read.csv("Skjalfandi_ps.csv")
+summary(x$latitude)
+summary(x$longitude)
+
+#S1 
+S1_env<-x[x$latitude>66.0654 & x$latitude<66.07,]
+#S2
+S2_env<-x[x$latitude>66.188 & x$latitude<66.25,]
+#S3
+S3_env<-x[x$latitude>66.265 & x$latitude<66.3,]
+#S4
+S4_env<-x[x$latitude>66.37 & x$latitude<66.4,]
+#S5
+S5_env<-x[x$latitude>66.44 & x$latitude<66.5,]
+
+summary(S1_env$salinity)
+summary(S2_env$salinity)
+summary(S3_env$salinity)
+summary(S4_env$salinity)
+summary(S5_env$salinity)
+
 library(mar)
 con <- connect_mar (dbname = "sjor")
 
@@ -736,6 +729,9 @@ corrplot::corrplot(EnvCor,type="lower")
 
 env<-env[,-4] #removed Depth due to high level of negative correlation with temperature and positive correlation with salinity
 
+######################################################
+#Redundancy Analysis
+######################################################
 require(vegan)
 Kampa.rda <- rda(Pop_afreq~., data=env)
 Kampa.rda
@@ -750,66 +746,26 @@ ordiplot(Kampa.rda,type="text") #species points are shown as crosses, environmen
 
 KampaLim.rda <- rda(Pop_afreq~btm_tmp + srf_tmp + sal, data=env)
 KampaLim.rda
+ordiplot(KampaLim.rda,type="text")
 
 KampaLimT.rda <- rda(Pop_afreq~btm_tmp + srf_tmp, data=env)
 KampaLimT.rda
 ordiplot(KampaLimT.rda,type="text")
 
-KampaSrf.rda <- rda(Pop_afreq~srf_tmp, data=env)
-KampaSrf.rda
-ordiplot(KampaSrf.rda,cex=3,type="text")
-
 KampaBtm.rda <- rda(Pop_afreq~btm_tmp, data=env)
 KampaBtm.rda
 ordiplot(KampaBtm.rda,type="text")
 
-KampaDpth.rda <- rda(Pop_afreq~dpth, data=env)
-KampaDpth.rda
-ordiplot(KampaDpth.rda,type="text")
+KampaSrf.rda <- rda(Pop_afreq~srf_tmp, data=env)
+KampaSrf.rda
+ordiplot(KampaSrf.rda,type="text")
 
 KampaSal.rda <- rda(Pop_afreq~sal, data=env)
 KampaSal.rda
 ordiplot(KampaSal.rda)
 
-AF<-data.frame(Pop_afreq)
-AF$Pop<-row.names(Pop_afreq)
-AF$Pop<-factor(row.names(Pop_afreq),levels=c("AR","S1","S2","S3","S4","S5","OS"))
-
-df <- melt(AF,  id.vars = 'Pop', variable.name = 'Alleles')
-df$Pop <- factor(df$Pop, levels=c("AR","S1","S2","S3","S4","S5","OS"))
-dfOut<-df[df$Alleles%in%row.names(R2)[row.names(R2)%in%paste("X",outliers,sep="")],]
-
-ggplot(dfOut)+
-  geom_line(aes(Pop,value,group=Alleles,colour=Alleles),linewidth=1)+
-  xlab("")+
-  ylab("Environment associated allele frequencies")+
-  theme_classic()+
-  theme(text = element_text(size=20))+
-  theme(axis.title.y=element_text(size=15))
-
-ggplot(dfOut[dfOut$Pop%in%c("AR","S1","S2","S4"),])+
-  geom_line(aes(Pop,value,group=Alleles,colour=Alleles),linewidth=1)+
-  xlab("")+
-  ylab("Temperature associated allele frequencies")+
-  theme_classic()+
-  theme(legend.position = "none",text = element_text(size=20))+
-  theme(axis.title.y=element_text(size=15))
-
-ggplot(dfOut[dfOut$Pop%in%c("S3","S5","OS"),])+
-  geom_line(aes(Pop,value,group=Alleles,colour=Alleles),linewidth=1)+
-  xlab("")+
-  ylab("Temperature associated allele frequencies")+
-  theme_classic()+
-  theme(legend.position = "none",text = element_text(size=20))+
-  theme(axis.title.y=element_text(size=15))
-
-perLocAdapt<-perLoc[row.names(perLoc)%in%row.names(R2)[(row.names(R2)%in%paste("X",outliers,sep=""))],]
-barplot(perLocAdapt$Fis, ylab=expression("F"[IS]),names.arg = c(row.names(perLocAdapt)),xlab = "Outlier alleles")
-barplot(perLocAdapt$Ho, ylab=expression("H"[O]),ylim=c(0,0.5), names.arg = c(row.names(perLocAdapt)),xlab = "Outlier alleles")
-barplot(perLocAdapt$Hs, ylab=expression("H"[S]),ylim=c(0,0.5),names.arg = c(row.names(perLocAdapt)),xlab = "Outlier alleles")
-
 ###################################################################################################
-#L50 gögn frá OS, S1, og S4
+#L50 data from OS, S1, og S4
 ###################################################################################################
 
 l50<-read.table("l50.skjalfandi.csv",sep=";",header=T)
